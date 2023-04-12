@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package examplepb;
+option go_package = "./example";
+import "validate/validate.proto";
+
+
+message StringTest {
+ //Bools
+//const: the field must be exactly the specified value.
+
+// x must be set to true
+bool x1 = 1 [(validate.rules).bool.const = true];
+
+// x cannot be set to true
+bool x2 = 2 [(validate.rules).bool.const = false];
+//Strings
+//const: the field must be exactly the specified value.
+// x must be set to "foo"
+string x3 = 3 [(validate.rules).string.const = "foo"];
+
+//len/min_len/max_len: these rules constrain the number of characters ( Unicode code points) in the field. Note that the number of characters may differ from the number of bytes in the string. The string is considered as-is, and does not normalize.
+
+// x must be exactly 5 characters long
+string x4 = 4 [(validate.rules).string.len = 5];
+
+// x must be at least 3 characters long
+string x5 = 5 [(validate.rules).string.min_len = 3];
+
+// x must be between 5 and 10 characters, inclusive
+string x6 = 6 [(validate.rules).string = {min_len: 5, max_len: 10}];
+// min_bytes/max_bytes: these rules constrain the number of bytes in the field.
+
+// x must be at most 15 bytes long
+string x7 = 7 [(validate.rules).string.max_bytes = 15];
+
+// x must be between 128 and 1024 bytes long
+string x8 = 8 [(validate.rules).string = {min_bytes: 128, max_bytes: 1024}];
+//pattern: the field must match the specified RE2-compliant regular expression. The included expression should elide any delimiters (ie, /\d+/ should just be \d+).
+
+// x must be a non-empty, case-insensitive hexadecimal string
+string x9 = 9 [(validate.rules).string.pattern = "(?i)^[0-9a-f]+$"];
+// prefix/suffix/contains/not_contains: the field must contain the specified substring in an optionally explicit location, or not contain the specified substring.
+
+// x must begin with "foo"
+string x10 = 10 [(validate.rules).string.prefix = "foo"];
+
+// x must end with "bar"
+string x11 = 11 [(validate.rules).string.suffix = "bar"];
+
+// x must contain "baz" anywhere inside it
+string x12 = 12 [(validate.rules).string.contains = "baz"];
+
+// x cannot contain "baz" anywhere inside it
+string x13 = 13 [(validate.rules).string.not_contains = "baz"];
+
+// x must begin with "fizz" and end with "buzz"
+string x14 = 14 [(validate.rules).string = {prefix: "fizz", suffix: "buzz"}];
+
+// x must end with ".proto" and be less than 64 characters
+string x15 = 15 [(validate.rules).string = {suffix: ".proto", max_len:64}];
+//in/not_in: these two rules permit specifying allow/denylists for the values of a field.
+
+// x must be either "foo", "bar", or "baz"
+string x16 = 16 [(validate.rules).string = {in: ["foo", "bar", "baz"]}];
+
+// x cannot be "fizz" nor "buzz"
+string x17 = 17 [(validate.rules).string = {not_in: ["fizz", "buzz"]}];
+// ignore_empty: this rule specifies that if field is empty or set to the default value, to ignore any validation rules. These are typically useful where being able to unset a field in an update request, or to skip validation for optional fields where switching to WKTs is not feasible.
+
+string CountryCode = 18 [(validate.rules).string = {ignore_empty: true, len: 2}];
+// well-known formats: these rules provide advanced constraints for common string patterns. These constraints will typically be more permissive and performant than equivalent regular expression patterns, while providing more explanatory failure descriptions.
+
+// x must be a valid email address (via RFC 5322)
+string x19 = 19 [(validate.rules).string.email = true];
+
+// x must be a valid address (IP or Hostname).
+string x20 = 20 [(validate.rules).string.address = true];
+
+// x must be a valid hostname (via RFC 1034)
+string x21 = 21 [(validate.rules).string.hostname = true];
+
+// x must be a valid IP address (either v4 or v6)
+string x22 = 22 [(validate.rules).string.ip = true];
+
+// x must be a valid IPv4 address
+// eg: "192.168.0.1"
+string x23 = 23 [(validate.rules).string.ipv4 = true];
+
+// x must be a valid IPv6 address
+// eg: "fe80::3"
+string x24 = 24 [(validate.rules).string.ipv6 = true];
+
+// x must be a valid absolute URI (via RFC 3986)
+string x25 = 25 [(validate.rules).string.uri = true];
+
+// x must be a valid URI reference (either absolute or relative)
+string x26 = 26 [(validate.rules).string.uri_ref = true];
+
+// x must be a valid UUID (via RFC 4122)
+string x27 = 27 [(validate.rules).string.uuid = true];
+
+// x must conform to a well known regex for HTTP header names (via RFC 7230)
+string x28 = 28 [(validate.rules).string.well_known_regex = HTTP_HEADER_NAME]
+
+// x must conform to a well known regex for HTTP header values (via RFC 7230) 
+string x29 = 29 [(validate.rules).string.well_known_regex = HTTP_HEADER_VALUE];
+
+// x must conform to a well known regex for headers, disallowing \r\n\0 characters.
+string x30 = 30 [(validate.rules).string {well_known_regex: HTTP_HEADER_VALUE, strict: false}];
+}

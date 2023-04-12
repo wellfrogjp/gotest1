@@ -93,7 +93,7 @@ func (m *Person) validate(all bool) error {
 	if !_Person_Name_Pattern.MatchString(m.GetName()) {
 		err := PersonValidationError{
 			field:  "Name",
-			reason: "value does not match regex pattern \"[^0-9A-Za-z]\"",
+			reason: "value does not match regex pattern \"^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$\"",
 		}
 		if !all {
 			return err
@@ -141,10 +141,10 @@ func (m *Person) validate(all bool) error {
 		}
 	}
 
-	if m.GetX5() != 1.23 {
+	if m.GetIds() <= 0 {
 		err := PersonValidationError{
-			field:  "X5",
-			reason: "value must equal 1.23",
+			field:  "Ids",
+			reason: "value must be greater than 0",
 		}
 		if !all {
 			return err
@@ -152,10 +152,10 @@ func (m *Person) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetX7() >= 10 {
+	if val := m.GetAge(); val <= 0 || val > 120 {
 		err := PersonValidationError{
-			field:  "X7",
-			reason: "value must be less than 10",
+			field:  "Age",
+			reason: "value must be inside range (0, 120]",
 		}
 		if !all {
 			return err
@@ -163,10 +163,10 @@ func (m *Person) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if m.GetX8() < 20 {
+	if _, ok := _Person_Code_InLookup[m.GetCode()]; !ok {
 		err := PersonValidationError{
-			field:  "X8",
-			reason: "value must be greater than or equal to 20",
+			field:  "Code",
+			reason: "value must be in list [1 2 3]",
 		}
 		if !all {
 			return err
@@ -174,10 +174,10 @@ func (m *Person) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if val := m.GetX9(); val < 30 || val >= 40 {
+	if _, ok := _Person_Score_NotInLookup[m.GetScore()]; ok {
 		err := PersonValidationError{
-			field:  "X9",
-			reason: "value must be inside range [30, 40)",
+			field:  "Score",
+			reason: "value must not be in list [0 99.99]",
 		}
 		if !all {
 			return err
@@ -312,7 +312,18 @@ var _ interface {
 	ErrorName() string
 } = PersonValidationError{}
 
-var _Person_Name_Pattern = regexp.MustCompile("[^0-9A-Za-z]")
+var _Person_Name_Pattern = regexp.MustCompile("^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$")
+
+var _Person_Code_InLookup = map[uint32]struct{}{
+	1: {},
+	2: {},
+	3: {},
+}
+
+var _Person_Score_NotInLookup = map[float32]struct{}{
+	0:     {},
+	99.99: {},
+}
 
 // Validate checks the field values on Person_Location with the rules defined
 // in the proto definition for this message. If any rules are violated, the

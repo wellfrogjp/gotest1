@@ -5,27 +5,32 @@ option go_package = "./example";
 import "validate/validate.proto";
 
 message Person {
-  uint64 id    = 1 [(validate.rules).uint64.gt = 999];
+  uint64 id = 1 [(validate.rules).uint64.gt = 999];
 
   string email = 2 [(validate.rules).string.email = true];
 
-  string name  = 3 [(validate.rules).string = {
-                      pattern:   "^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$",
-                      max_bytes: 256,
-                   }];
+  string name = 3 [(validate.rules).string = {
+    //pattern:   "^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$",
+    //pattern:   "^[^[0-9]A-Za-z]+( [^[0-9]A-Za-z]+)*$",
+    pattern:   "[^0-9A-Za-z]",
+    max_bytes: 256,
+  }];
 
   Location home = 4 [(validate.rules).message.required = true];
-// 参数必须大于 0
-int64 ids = 5 [(validate.rules).int64 = {gt: 0}];
-// 参数必须在 0 到 120 之间
-int32 age = 6 [(validate.rules).int32 = {gt:0, lte: 120}];
-// 参数是 1 或 2 或 3
-uint32 code = 7 [(validate.rules).uint32 = {in: [1,2,3]}];
-// 参数不能是 0 或 99.99
-float score = 8 [(validate.rules).float = {not_in: [0, 99.99]}];
+
+  float x5 = 5 [(validate.rules).float.const = 1.23];
+    // x must be less than 10
+    int32 x7 = 7 [(validate.rules).int32.lt = 10];
+
+    // x must be greater than or equal to 20
+    uint64 x8 = 8 [(validate.rules).uint64.gte = 20];
+
+    // x must be in the range [30, 40)
+    fixed32 x9 = 9 [(validate.rules).fixed32 = {gte:30, lt: 40}];
+
 
   message Location {
-    double lat = 1 [(validate.rules).double = { gte: -90,  lte: 90 }];
-    double lng = 2 [(validate.rules).double = { gte: -180, lte: 180 }];
+    double lat = 1 [(validate.rules).double = {gte: -90,  lte: 90}];
+    double lng = 2 [(validate.rules).double = {gte: -180, lte: 180}];
   }
 }
