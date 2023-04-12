@@ -1,0 +1,49 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"net"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type validate interface {
+	Validate() error
+}
+
+type Server struct{}
+
+func (s Server) Hello(ctx context.Context, person *proto.Person) (*proto.Response, error) {
+	return &proto.Response{
+		Data: person.Mobile,
+	}, nil
+}
+
+func main() {
+	listen, err := net.Listen("tcp", ":4321")
+	if err != nil {
+		fmt.Println("监听失败：", err)
+		return
+	}
+
+	s := grpc.NewServer(grpc.UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		fmt.Println("有请求")
+		if r, ok := req.(validate); ok {
+			if err := r.Validate(); err != nil {
+				return resp, status.Error(codes.InvalidArgument, err.Error())
+			}
+		}
+
+		return handler(ctx, req)
+	}))
+	proto.RegisterHelloServer(s, &Server{})
+
+	err = s.Serve(listen)
+	if err != nil {
+		fmt.Println("启动服务失败：", err)
+		return
+	}
+}

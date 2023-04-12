@@ -1,0 +1,30 @@
+syntax = "proto3";
+option go_package = ".;proto";
+
+//option go_package = "examplepb/;examplepb";
+
+//package examplepb;
+
+import "validate/validate.proto";
+
+
+//import "validate.proto";
+
+service Hello{
+  rpc Hello(Person) returns(Response);
+}
+
+message Person {
+  uint64 id     = 1 [(validate.rules).uint64.gt = 999];
+
+  string email  = 2 [(validate.rules).string.email = true];
+
+  string mobile = 3 [(validate.rules).string = {
+    pattern:   "^1[3456789]\\d{9}$",
+  }];
+
+}
+
+message Response{
+  string data = 1;
+}
